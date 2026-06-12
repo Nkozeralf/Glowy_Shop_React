@@ -1,0 +1,8 @@
+# public/robots.txt
+User-agent: *
+Allow: /
+Sitemap: https://glowy-266b3.web.app/sitemap.xml
+
+# Deshabilitar rutas innecesarias
+Disallow: /admin
+Disallow: /api

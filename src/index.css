@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=MuseoModerno:wght@300;400;500;600;700;900&display=swap');
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Colores Glowy */
+  --color-glowy-pink: #CE1D76;
+  --color-glowy-berry: #7E1449;
+  --color-glowy-lavender: #9879CC;
+  --color-glowy-white: #FFFFFF;
+  --color-glowy-black: #000000;
+  --color-glowy-gray: #ABB8C3;
+
+  /* Canales de compra */
+  --color-rappi: #FF441A;
+  --color-mercadolibre: #FFE600;
+  --color-whatsapp: #25D366;
+
+  /* Tipografía */
+  --font-brand: 'MuseoModerno', sans-serif;
+}
+
+* {
+  font-family: var(--font-brand);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Mejora el contraste en modo oscuro */
+.dark .animate-pulse {
+  background-image: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    transparent 50%
+  );
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
