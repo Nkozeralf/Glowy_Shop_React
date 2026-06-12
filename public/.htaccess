@@ -1,0 +1,26 @@
+# Forzar MIME types correctos para archivos JS y CSS
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType text/css .css
+  AddType application/wasm .wasm
+</IfModule>
+
+# Para archivos JS con extension .js
+<FilesMatch "\.js$">
+  Header set Content-Type "application/javascript"
+</FilesMatch>
+
+# Habilitar CORS si es necesario
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Redirigir todas las rutas a index.html (para React Router)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
