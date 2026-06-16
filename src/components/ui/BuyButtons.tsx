@@ -1,9 +1,10 @@
-// src/components/ui/BuyButtons.tsx (versión simplificada)
+// src/components/ui/BuyButtons.tsx
 import { useState } from 'react'
 import { ShoppingBag, ChevronRight, Bike, UtensilsCrossed } from 'lucide-react'
 import { useDeliveryChannels } from '../../hooks/useDeliveryChannels'
 import { ComingSoonModal } from './ComingSoonModal'
 import { buyChannels } from '../../data/buyChannels'
+import { trackEvent, Events, trackChannelClick } from '../../utils/analytics'
 
 const WhatsAppIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
@@ -43,13 +44,18 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
   const handleDidiClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    console.log('📊 [GA] DIDI_MODAL - Usuario abrió modal de DiDi Food')
+    trackEvent(Events.HERO_DIDI_MODAL, { location: variant === 'compact' ? 'buy_buttons_compact' : 'buy_buttons_primary' })
     setShowDidiModal(true)
   }
 
-  const handleChannelClick = (url: string, e: React.MouseEvent) => {
+  const handleChannelClick = (url: string, channelName: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
     if (url && url !== '#') {
+      console.log(`📊 [GA] CHANNEL_CLICK - ${channelName} (${variant === 'compact' ? 'compact' : 'primary'})`)
+      trackChannelClick(channelName, variant === 'compact' ? 'buy_buttons_compact' : 'buy_buttons_primary')
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }
@@ -75,7 +81,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
           {/* WhatsApp */}
           <a
             href="#"
-            onClick={(e) => handleChannelClick(whatsappUrl, e)}
+            onClick={(e) => handleChannelClick(whatsappUrl, 'WhatsApp', e)}
             className="group relative flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] overflow-hidden cursor-pointer"
             style={{ 
               backgroundColor: channelColors.whatsapp,
@@ -96,7 +102,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
           {/* Rappi */}
           <a
             href="#"
-            onClick={(e) => handleChannelClick(rappiUrl, e)}
+            onClick={(e) => handleChannelClick(rappiUrl, 'Rappi', e)}
             className="group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] border cursor-pointer"
             style={{ borderColor: `${channelColors.rappi}50`, backgroundColor: 'transparent' }}
           >
@@ -130,7 +136,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
           {/* MercadoLibre */}
           <a
             href="#"
-            onClick={(e) => handleChannelClick(mercadolibreUrl, e)}
+            onClick={(e) => handleChannelClick(mercadolibreUrl, 'MercadoLibre', e)}
             className="group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] border cursor-pointer"
             style={{ borderColor: `${channelColors.mercadolibre}50`, backgroundColor: 'transparent' }}
           >
@@ -157,7 +163,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
         {/* WhatsApp */}
         <a
           href="#"
-          onClick={(e) => handleChannelClick(whatsappUrl, e)}
+          onClick={(e) => handleChannelClick(whatsappUrl, 'WhatsApp', e)}
           className="group relative flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 hover:scale-[1.015] active:scale-[0.985] select-none cursor-pointer hover:brightness-110"
           style={{ backgroundColor: channelColors.whatsapp }}
         >
@@ -198,7 +204,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
         {/* Rappi */}
         <a
           href="#"
-          onClick={(e) => handleChannelClick(rappiUrl, e)}
+          onClick={(e) => handleChannelClick(rappiUrl, 'Rappi', e)}
           className="group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 hover:scale-[1.015] active:scale-[0.985] select-none cursor-pointer border"
           style={{ borderColor: `${channelColors.rappi}40`, borderWidth: '1px', backgroundColor: 'transparent' }}
         >
@@ -218,7 +224,7 @@ export function BuyButtons({ variant = 'compact' }: BuyButtonsProps) {
         {/* MercadoLibre */}
         <a
           href="#"
-          onClick={(e) => handleChannelClick(mercadolibreUrl, e)}
+          onClick={(e) => handleChannelClick(mercadolibreUrl, 'MercadoLibre', e)}
           className="group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 hover:scale-[1.015] active:scale-[0.985] select-none cursor-pointer border"
           style={{ borderColor: `${channelColors.mercadolibre}40`, borderWidth: '1px', backgroundColor: 'transparent' }}
         >

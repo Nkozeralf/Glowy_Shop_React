@@ -4,6 +4,7 @@ import { ShoppingBag, ChevronRight, Bike, UtensilsCrossed } from 'lucide-react'
 import { useDeliveryChannels } from '../hooks/useDeliveryChannels'
 import { products } from '../data/products'
 import { ComingSoonModal } from '../components/ui/ComingSoonModal'
+import { trackChannelClick } from '../utils/analytics'
 
 const heroProduct = products.find((p) => p.id === 'shampoo-ultra-nutritivo-milagros')!
 
@@ -55,20 +56,26 @@ export default function HeroSection() {
   const primaryChannel = channels[0]
   const secondaryChannels = channels.slice(1)
 
+  // Handler unificado para clics en canales
   const handleChannelClick = (channel: any, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
     // Si es DiDi, mostrar modal
     if (channel.id === 'didi') {
-      e.preventDefault()
-      e.stopPropagation()
+      console.log(`📊 [GA] HERO_DIDI_MODAL - Usuario hizo clic en DiDi`)
       setShowDidiModal(true)
-      return false
+      return
     }
-    // Para otros canales, dejar que el enlace normal funcione
-    return true
+    
+    // Para otros canales, abrir en nueva pestaña
+    console.log(`📊 [GA] HERO_CHANNEL_CLICK - ${channel.name}`)
+    trackChannelClick(channel.name, 'hero')
+    window.open(channel.url, '_blank', 'noopener,noreferrer')
   }
 
   return (
-    <section  id="Hero" className="min-h-screen bg-glowy-white dark:bg-[#0f0f0f] flex items-center px-6 pt-20 overflow-hidden transition-colors duration-300">
+    <section id="Hero" className="min-h-screen bg-glowy-white dark:bg-[#0f0f0f] flex items-center px-6 pt-20 overflow-hidden transition-colors duration-300">
       <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-20 items-center py-16">
 
         {/* ── Columna izquierda ── */}
@@ -106,9 +113,7 @@ export default function HeroSection() {
             {/* ── Canal primario (WhatsApp) — sólido, color de marca ── */}
             {locationStatus !== 'loading' && primaryChannel && (
               <a
-                href={primaryChannel.id === 'didi' ? '#' : primaryChannel.url}
-                target={primaryChannel.id !== 'didi' ? "_blank" : undefined}
-                rel="noopener noreferrer"
+                href="#"
                 onClick={(e) => handleChannelClick(primaryChannel, e)}
                 className="group relative flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 hover:brightness-110 hover:scale-[1.015] active:scale-[0.985] select-none"
                 style={{ backgroundColor: primaryChannel.color }}
@@ -141,9 +146,7 @@ export default function HeroSection() {
             {locationStatus !== 'loading' && secondaryChannels.map((channel) => (
               <a
                 key={channel.id}
-                href={channel.id === 'didi' ? '#' : channel.url}
-                target={channel.id !== 'didi' ? "_blank" : undefined}
-                rel="noopener noreferrer"
+                href="#"
                 onClick={(e) => handleChannelClick(channel, e)}
                 className="group flex items-center gap-4 px-5 py-3.5 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] select-none
                   border-black/8 hover:border-black/16 hover:bg-black/[0.025]

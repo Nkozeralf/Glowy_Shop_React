@@ -1,8 +1,9 @@
 // src/sections/ProductsSection.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SectionTitle from '../components/ui/SectionTitle'
 import { products } from '../data/products'
 import { BuyButtons } from '../components/ui/BuyButtons'
+import { trackEvent, Events } from '../utils/analytics'
 
 export default function ProductsSection() {
   const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({})
@@ -11,8 +12,40 @@ export default function ProductsSection() {
     setImagesLoaded(prev => ({ ...prev, [id]: true }))
   }
 
+  // Trackear cuando la sección de productos es visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          console.log('📊 [GA] SECTION_VIEW - Sección de productos visible')
+          trackEvent(Events.SECTION_VIEW, { section: 'products' })
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    const section = document.getElementById('products')
+    if (section) {
+      observer.observe(section)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Handler para clic en producto
+  const handleProductClick = (product: any) => {
+    console.log(`📊 [GA] PRODUCT_VIEW - Usuario vio: ${product.name}`)
+    trackEvent(Events.PRODUCT_VIEW, {
+      product_id: product.id,
+      product_name: product.name,
+      brand: product.brand,
+      price: product.price || 0,
+    })
+  }
+
   return (
-    <section  id="products" className="py-24 px-6 bg-[#f9f9f9] dark:bg-[#0a0a0a] transition-colors duration-300">
+    <section id="products" className="py-24 px-6 bg-[#f9f9f9] dark:bg-[#0a0a0a] transition-colors duration-300">
       <div className="max-w-6xl mx-auto flex flex-col gap-16">
 
         <SectionTitle
@@ -22,8 +55,11 @@ export default function ProductsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {products.map((product) => (
-            <div key={product.id} className="group flex flex-col bg-white dark:bg-white/5 rounded-2xl overflow-hidden hover:shadow-xl dark:hover:shadow-black/40 transition-all duration-300">
-
+            <div 
+              key={product.id} 
+              className="group flex flex-col bg-white dark:bg-white/5 rounded-2xl overflow-hidden hover:shadow-xl dark:hover:shadow-black/40 transition-all duration-300 cursor-pointer"
+              onClick={() => handleProductClick(product)}
+            >
               {/* Imagen - Mejorada para cualquier tipo de fondo */}
               <div className="relative w-full aspect-square bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
                 {product.image ? (
@@ -32,24 +68,24 @@ export default function ProductsSection() {
                     {!imagesLoaded[product.id] && (
                       <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700" />
                     )}
-                  
-<img 
-  src={product.image} 
-  alt={product.name} 
-  width="400"
-  height="400"
-  loading="lazy"  
-  decoding="async" 
-  className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
-    imagesLoaded[product.id] ? 'opacity-100' : 'opacity-0'
-  }`}
-  style={{
-    objectPosition: 'center',
-    background: 'transparent',
-    aspectRatio: '1/1'  // ← Fuerza la relación de aspecto
-  }}
-  onLoad={() => handleImageLoad(product.id)}
-/>
+                   
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      width="400"
+                      height="400"
+                      loading="lazy"  
+                      decoding="async" 
+                      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+                        imagesLoaded[product.id] ? 'opacity-100' : 'opacity-0'
+                      }`}
+                      style={{
+                        objectPosition: 'center',
+                        background: 'transparent',
+                        aspectRatio: '1/1'
+                      }}
+                      onLoad={() => handleImageLoad(product.id)}
+                    />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

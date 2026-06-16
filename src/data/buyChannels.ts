@@ -5,7 +5,7 @@ export const buyChannels: BuyChannel[] = [
   {
     id: 'whatsapp',
     name: 'WhatsApp',
-    url: 'https://wa.me/573203592600?text=Hola%20Glowy%20Beauty,%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20los%20productos%20y%20pol%C3%ADticas%20de%20la%20tienda.%20Visit%C3%A9%20su%20p%C3%A1gina%20web%20y%20deseo%20recibir%20detalles%20completos.',
+    url: 'https://wa.me/573203592600?text=Hola%20Glowy%20Beauty.%20Vengo%20del%20bot%C3%B3n%20principal%20del%20Hero%20de%20la%20web%20y%20quiero%20m%C3%A1s%20informaci%C3%B3n.',
     color: '#25D366',
     colorDark: '#128C7E',
     description: 'Sin intermediarios',

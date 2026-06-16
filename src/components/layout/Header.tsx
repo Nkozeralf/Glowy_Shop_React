@@ -1,6 +1,8 @@
+// src/components/layout/Header.tsx
 import { useState, useEffect } from 'react'
 import Button from '../ui/Button'
 import { Sun, Moon } from 'lucide-react'
+import { trackEvent, Events } from '../../utils/analytics'
 
 interface HeaderProps {
   theme: 'light' | 'dark'
@@ -10,7 +12,6 @@ interface HeaderProps {
 export default function Header({ theme, onToggle }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
 
-  // Solo efecto para cambiar estilo al hacer scroll
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
@@ -20,7 +21,6 @@ export default function Header({ theme, onToggle }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Barra de progreso
   const [scrollProgress, setScrollProgress] = useState(0)
   
   useEffect(() => {
@@ -34,6 +34,26 @@ export default function Header({ theme, onToggle }: HeaderProps) {
     window.addEventListener('scroll', handleProgress)
     return () => window.removeEventListener('scroll', handleProgress)
   }, [])
+
+  const handleLogoClick = () => {
+    console.log('📊 [GA] HEADER_LOGO_CLICK - Usuario hizo clic en el logo')
+    document.querySelector('#Hero')?.scrollIntoView({ behavior: 'smooth' })
+    trackEvent(Events.HEADER_LOGO_CLICK)
+  }
+
+  const handleExploreClick = () => {
+    console.log('📊 [GA] HEADER_EXPLORE_CLICK - Usuario hizo clic en "Explorar catálogo"')
+    trackEvent(Events.HEADER_EXPLORE_CLICK)
+  }
+
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    console.log(`📊 [GA] HEADER_THEME_TOGGLE - Cambiando a modo ${newTheme}`)
+    onToggle()
+    trackEvent(Events.HEADER_THEME_TOGGLE, {
+      theme: newTheme,
+    })
+  }
 
   return (
     <header 
@@ -49,7 +69,7 @@ export default function Header({ theme, onToggle }: HeaderProps) {
     >
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        {/* Logo con animación de brillo */}
+        {/* Logo */}
         <span 
           className="
             text-2xl font-bold text-glowy-pink tracking-tight
@@ -60,9 +80,7 @@ export default function Header({ theme, onToggle }: HeaderProps) {
             before:-translate-x-full hover:before:translate-x-full
             before:transition-transform before:duration-700
           "
-          onClick={() => {
-            document.querySelector('#Hero')?.scrollIntoView({ behavior: 'smooth' })
-          }}
+          onClick={handleLogoClick}
         >
           Glowy
           <span className="text-xs font-normal text-glowy-gray ml-1 hidden sm:inline">Beauty</span>
@@ -70,10 +88,10 @@ export default function Header({ theme, onToggle }: HeaderProps) {
 
         <div className="flex items-center gap-3">
 
-          {/* Theme Toggle con efecto de pulso y glow */}
+          {/* Theme Toggle */}
           <div className="relative group">
             <button
-              onClick={onToggle}
+              onClick={handleThemeToggle}
               aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
               title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
               className="
@@ -90,7 +108,6 @@ export default function Header({ theme, onToggle }: HeaderProps) {
                 active:scale-95
               "
             >
-              {/* Efecto de glow al hacer hover */}
               <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-[0_0_15px_rgba(206,29,118,0.5)]" />
               
               <Sun
@@ -122,7 +139,6 @@ export default function Header({ theme, onToggle }: HeaderProps) {
               />
             </button>
 
-            {/* Tooltip con animación de fade + slide */}
             <span
               className="
                 absolute top-full mt-2 left-1/2 -translate-x-1/2
@@ -143,81 +159,80 @@ export default function Header({ theme, onToggle }: HeaderProps) {
             </span>
           </div>
 
-          {/* Botón CTA con animaciones mejoradas */}
-          <Button
-            href="#products"
-            variant="pink"
-            target="_self"
-            className="
-              group 
-              relative
-              overflow-hidden
-              rounded-full
-              px-6
-              py-3
-              font-semibold
-              tracking-tight
-              shadow-lg
-              hover:shadow-xl
-              hover:-translate-y-0.5
-              active:translate-y-0
-              transition-all
-              duration-300
-              hover:scale-[1.02]
-            "
-          >
-            {/* Efecto de brillo láser */}
-            <span
+          {/* Botón CTA - Wrapper para onClick */}
+          <span onClick={handleExploreClick}>
+            <Button
+              href="#products"
+              variant="pink"
+              target="_self"
               className="
-                absolute inset-0
-                -translate-x-full
-                bg-gradient-to-r
-                from-transparent
-                via-white/30
-                to-transparent
-                group-hover:translate-x-full
-                transition-transform
-                duration-700
-                ease-out
+                group 
+                relative
+                overflow-hidden
+                rounded-full
+                px-6
+                py-3
+                font-semibold
+                tracking-tight
+                shadow-lg
+                hover:shadow-xl
+                hover:-translate-y-0.5
+                active:translate-y-0
+                transition-all
+                duration-300
+                hover:scale-[1.02]
               "
-            />
-            
-            {/* Efecto de pulso al hover */}
-            <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-[0_0_20px_rgba(206,29,118,0.8)]" />
-
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="relative">
-                Explorar catálogo
-                {/* Línea decorativa que aparece en hover */}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/50 group-hover:w-full transition-all duration-500" />
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            >
+              <span
                 className="
-                  transition-all
-                  duration-300
-                  group-hover:translate-x-1.5
-                  group-hover:scale-110
+                  absolute inset-0
+                  -translate-x-full
+                  bg-gradient-to-r
+                  from-transparent
+                  via-white/30
+                  to-transparent
+                  group-hover:translate-x-full
+                  transition-transform
+                  duration-700
+                  ease-out
                 "
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </span>
-          </Button>
+              />
+              
+              <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-[0_0_20px_rgba(206,29,118,0.8)]" />
+
+              <span className="relative z-10 flex items-center gap-2">
+                <span className="relative">
+                  Explorar catálogo
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/50 group-hover:w-full transition-all duration-500" />
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="
+                    transition-all
+                    duration-300
+                    group-hover:translate-x-1.5
+                    group-hover:scale-110
+                  "
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </span>
+            </Button>
+          </span>
         </div>
 
       </div>
 
-      {/* Barra de progreso de scroll (efecto moderno) */}
+      {/* Barra de progreso */}
       <div 
         className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-glowy-pink to-glowy-lavender transition-all duration-150"
         style={{ width: `${scrollProgress}%` }}

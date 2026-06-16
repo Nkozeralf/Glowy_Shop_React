@@ -15,12 +15,6 @@ interface DeliveryChannelsResult {
 const RAPPI_CITIES = ['bogotá', 'bogota', 'medellín', 'medellin', 'cali', 'barranquilla', 'cartagena', 'bucaramanga', 'pereira', 'manizales', 'santa marta', 'cúcuta', 'cucuta']
 const DIDI_CITIES = ['bogotá', 'bogota', 'medellín', 'medellin', 'cali', 'barranquilla', 'cartagena', 'bucaramanga']
 
-// Múltiples APIs de geolocalización por IP (fallbacks)
-const GEO_APIS = [
-  'https://ipapi.co/json/',
-  'https://freeipapi.com/api/json/',
-  'https://geolocation-db.com/json/'
-]
 
 function isCityInList(city: string, cityList: string[]): boolean {
   if (!city) return false
@@ -62,10 +56,13 @@ export function useDeliveryChannels(): DeliveryChannelsResult {
   const isMobile = typeof navigator !== 'undefined' ? detectMobile() : false
 
   const detectByIP = async (): Promise<boolean> => {
-    for (const apiUrl of GEO_APIS) {
+    // 🔥 NUEVO: Intentar primero con geolocation-db (más confiable)
+    const apisOrder = ['https://geolocation-db.com/json/', 'https://ipapi.co/json/']
+    
+    for (const apiUrl of apisOrder) {
       try {
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        const timeoutId = setTimeout(() => controller.abort(), 4000) // 🔥 Aumentado a 4s
         
         const res = await fetch(apiUrl, { signal: controller.signal })
         clearTimeout(timeoutId)
@@ -77,8 +74,6 @@ export function useDeliveryChannels(): DeliveryChannelsResult {
         
         if (apiUrl.includes('ipapi.co')) {
           city = data.city || ''
-        } else if (apiUrl.includes('freeipapi')) {
-          city = data.cityName || ''
         } else if (apiUrl.includes('geolocation-db')) {
           city = data.city || ''
         }
@@ -99,7 +94,10 @@ export function useDeliveryChannels(): DeliveryChannelsResult {
           return true
         }
       } catch (error) {
-        console.log(`API falló: ${apiUrl}`, error)
+        // 🔥 Solo mostrar errores en desarrollo, no en producción
+        if (import.meta.env.DEV) {
+          console.log(`API falló: ${apiUrl}`, error)
+        }
         continue
       }
     }
@@ -131,7 +129,7 @@ export function useDeliveryChannels(): DeliveryChannelsResult {
         setCityName('colombia')
         saveLocationToCache('colombia', 'colombia')
       }
-    }, 3000)
+    }, 4000) // 🔥 Aumentado a 4s
     
     return () => {
       isMounted = false
@@ -139,31 +137,24 @@ export function useDeliveryChannels(): DeliveryChannelsResult {
     }
   }, [])
 
-  // 📊 Lógica de filtrado MEJORADA - DiDi ahora se muestra en más casos
+  // 📊 Lógica de filtrado MEJORADA
   const channels = buyChannels.filter((channel) => {
-    // Siempre mostrar durante loading
     if (locationStatus === 'loading') {
       return channel.id === 'whatsapp' || channel.id === 'mercadolibre'
     }
 
-    // WhatsApp y MercadoLibre SIEMPRE disponibles
     if (channel.id === 'whatsapp') return true
     if (channel.id === 'mercadolibre') return true
     
-    // Rappi: mostrar en toda Colombia
     if (channel.id === 'rappi') {
       if (locationStatus === 'bogota') return true
       if (cityName && isCityInList(cityName, RAPPI_CITIES)) return true
-      // Si estamos en Colombia pero no sabemos la ciudad exacta, mostrar Rappi igual
       return locationStatus === 'colombia'
     }
     
-    // DiDi Food: más permisivo - mostrar en toda Colombia por ahora
     if (channel.id === 'didi') {
-      // Mostrar siempre en Colombia (no solo en ciudades específicas)
       if (locationStatus === 'bogota') return true
       if (cityName && isCityInList(cityName, DIDI_CITIES)) return true
-      // 🔥 NUEVO: Si estamos en Colombia, mostrar DiDi igualmente
       return locationStatus === 'colombia'
     }
 
