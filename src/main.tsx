@@ -5,7 +5,7 @@ import './index.css'
 import App from './App.tsx'
 
 
-ReactGA.initialize('G-RYSYVEBLGD')
+ReactGA.initialize('G-G-5RY3D0LZQW')
 
 
 createRoot(document.getElementById('root')!).render(
